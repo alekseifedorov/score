@@ -1,13 +1,13 @@
 buildscript {
-	ext {
-		springBootVersion = '2.1.2.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-	}
+    ext {
+        springBootVersion = '2.1.2.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
 }
 
 apply plugin: 'java'
@@ -18,31 +18,29 @@ group = 'my.assignment'
 version = '1.0'
 sourceCompatibility = '1.8'
 
-
-
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencyManagement {
 
-	dependencies {
-
-		dependency 'org.projectlombok:lombok:1.16.18'
-	}
+    dependencies {
+        dependency 'org.projectlombok:lombok:1.16.18'
+        dependency 'org.assertj:assertj-core:3.6.2'
+        dependency 'org.apache.commons:commons-lang3:3.0'
+    }
 }
 
-
-
 dependencies {
-	compile("org.springframework.boot:spring-boot-starter")
-	compile("org.springframework:spring-web")
-	testCompile 'org.springframework.boot:spring-boot-starter-test'
-	compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile("org.springframework.boot:spring-boot-starter")
+    compile("org.springframework:spring-web")
+    compile('org.springframework.boot:spring-boot-starter-webflux')
 
-	compileOnly 'org.projectlombok:lombok'
-	testCompileOnly 'org.projectlombok:lombok'
-	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+    compileOnly 'org.projectlombok:lombok'
+    compile 'org.apache.commons:commons-lang3'
+
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile("org.assertj:assertj-core")
 
 }
 

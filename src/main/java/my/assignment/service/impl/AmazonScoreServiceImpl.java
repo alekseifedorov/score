@@ -16,12 +16,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Main class to find the second level's keywords and run a worker for each one
+ */
 @Service
 @AllArgsConstructor
 @Slf4j
 public class AmazonScoreServiceImpl implements AmazonScoreService {
 
-    protected static final List<Double> WEIGHTS = Arrays.asList(0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125, 0.00390625, 0.001953125, 0.001953125);
+    public static final List<Double> WEIGHTS = Arrays.asList(0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125, 0.00390625, 0.001953125, 0.001953125);
 
     private final TransportClient transportClient;
     private final ExecutorService service;
@@ -37,8 +40,9 @@ public class AmazonScoreServiceImpl implements AmazonScoreService {
         }
     }
 
+
     private double doEstimate(String keyword) throws InterruptedException {
-        //first search
+        // first search
         List<String> resultKeywords = transportClient.search(keyword);
 
         List<Worker> workers = new ArrayList<>();

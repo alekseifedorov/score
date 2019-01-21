@@ -12,11 +12,14 @@ import java.util.concurrent.Callable;
 
 import static my.assignment.service.impl.AmazonScoreServiceImpl.WEIGHTS;
 
+/**
+ * Class to estimate the partial score by the second level's keyword.
+ */
 @Slf4j
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Setter
-class Worker implements Callable<Double> {
+public class Worker implements Callable<Double> {
 
     private TransportClient transportClient;
     private String keyword;

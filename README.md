@@ -17,10 +17,10 @@ This operation is repeated for each item of the returned list if this item conta
 
 The list is supposed to be sorted by relevancy so each item has the respective weight in the formula as follows:
 
-   EST = N1 * W1 + N2 * W2 + ... + N10 * W10 
+   EST = W1 * (N1 * W1 + N2 * W2 + ... +  N10 * W10) + ... +  W10 * (N'1 * W1 + N'2 * W2 + ... +  N'10 * W10)
 
       where Nj is 0 or 1 whether the input word is present in the item of the second level result or not;
-      Wj is gradually reduced weights (0.5, 0.25, 0.125 etc).
+      Wj is gradually reducing weights (0.5, 0.25, 0.125 etc) 
 
 To perform the requests in parallel the java.util.concurrent.ThreadPoolExecutor is used. The overall timeout is 10 seconds.
 

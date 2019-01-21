@@ -8,6 +8,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Utility class to abstract the REST requests to completion.amazon.com
+ */
 @Service
 @AllArgsConstructor
 @Slf4j
