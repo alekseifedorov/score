@@ -3,26 +3,20 @@
    http://<HOSTNAME>:9000/estimate?keyword=<keyword>
 
 - Input: an Amazon Keyword 
-- Output (json format) : a search-volume estimate from 0 to 1
+- Output (json format) : a search-volume estimate from 1 to 100.
 
 For example, when typing `http://localhost:9000/estimate?keyword=linux` in the browser the result is following:
   {
     "keyword": "linux",
-    "score": 0.3134765625
+    "score": 16
   }
 
 2. Algorithm
-  The input Amazon word is fed to http://completion.amazon.com/search/complete. 
-This operation is repeated for each item of the returned list if this item contains the word.
-
-The list is supposed to be sorted by relevancy so each item has the respective weight in the formula as follows:
-
-   EST = W1 * (N1 * W1 + N2 * W2 + ... +  N10 * W10) + ... +  W10 * (N'1 * W1 + N'2 * W2 + ... +  N'10 * W10)
-
-      where Nj is 0 or 1 whether the input word is present in the item of the second level result or not;
-      Wj is gradually reducing weights (0.5, 0.25, 0.125 etc) 
-
-To perform the requests in parallel the java.util.concurrent.ThreadPoolExecutor is used. The overall timeout is 10 seconds.
+  The sequence of substrings are created from the input Amazon word by sequential adding of one letter, for example, for the word `linux` the sequence is following:
+  `l`, `li`, `lin`, `linu`.
+  Each of the words is fed to http://completion.amazon.com/search/complete which returns 10 strings representing the most popular user's input.
+  A score is assigned for one occurence of the main completed keyword in each of 10 returned strings.
+  To align scores for words of different length the coefficient is applied. 
 
 3. How to build
     Type 'gradlew clean build' to build amazon-score-1.0.jar.

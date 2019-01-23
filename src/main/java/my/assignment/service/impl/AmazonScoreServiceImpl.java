@@ -9,7 +9,6 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -17,55 +16,55 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Main class to find the second level's keywords and run a worker for each one
+ * Main class to create workers and summarize received partial results
  */
 @Service
 @AllArgsConstructor
 @Slf4j
 public class AmazonScoreServiceImpl implements AmazonScoreService {
 
-    public static final List<Double> WEIGHTS = Arrays.asList(0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125, 0.00390625, 0.001953125, 0.001953125);
+    public static final int MAX_SCORE = 100;
+    public static final int SEARCH_RESULTS_SIZE = 10;
 
-    private final TransportClient transportClient;
     private final ExecutorService service;
     private final ObjectFactory<Worker> workerFactory;
 
     @Override
     public Score estimate(String keyword) {
         try {
-            double score = doEstimate(keyword);
+            double score = createAndStartWorkers(keyword);
             return new Score(keyword, score);
         } catch (InterruptedException e) {
-            throw new MyException("worker manager interrupted", e);
+            throw new MyException("service interrupted", e);
         }
     }
 
-
-    private double doEstimate(String keyword) throws InterruptedException {
-        // first search
-        List<String> resultKeywords = transportClient.search(keyword);
-
+    private long createAndStartWorkers(String keyword) throws InterruptedException {
+        String prefix = "";
         List<Worker> workers = new ArrayList<>();
-        for (int i = 0; i < resultKeywords.size(); i++) {
+        for (char c : keyword.substring(0, keyword.length() - 1).toCharArray()) {
+            prefix += c;
             Worker worker = workerFactory.getObject();
-            worker.setFirstLevelWeight(WEIGHTS.get(i));
-            worker.setReturnedResult(resultKeywords.get(i).substring(keyword.length()).trim());
+            worker.setPrefix(prefix);
             worker.setKeyword(keyword);
             workers.add(worker);
         }
 
-        List<Future<Double>> futures = service.invokeAll(workers, 10, TimeUnit.SECONDS);
+        List<Future<Long>> futures = service.invokeAll(workers, 10, TimeUnit.SECONDS);
+
+        int coefficient = MAX_SCORE / ((keyword.length() - 1) * SEARCH_RESULTS_SIZE);
 
         return futures.stream()
                       .map(f -> {
                           try {
                               return f.get();
                           } catch (Exception e) {
-                              throw new MyException("Exception when getting result", e);
+                              log.error("Exception when getting result", e);
+                              return null;
                           }
                       })
                       .filter(Objects::nonNull)
-                      .mapToDouble(f -> f)
-                      .sum();
+                      .mapToLong(f -> f)
+                      .sum() * coefficient;
     }
 }
